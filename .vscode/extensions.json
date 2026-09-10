@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "hostinger.hostinger-connector",
+        "anysphere.remote-ssh",
+        "anysphere.remote-wsl"
+    ]
+}

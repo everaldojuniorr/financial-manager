@@ -1,0 +1,7 @@
+financyexpert.com, www.financyexpert.com {
+	reverse_proxy app-blue:3000
+}
+
+webmail.financyexpert.com {
+	reverse_proxy host.docker.internal:3010
+}
