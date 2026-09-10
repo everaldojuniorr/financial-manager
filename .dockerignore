@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+data/ledger.json
+data/ledger.json.tmp
+data/*.corrupt-*.json
+.env
+.env.local
+*.md
+!README.md

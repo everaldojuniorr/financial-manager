@@ -1,0 +1,3 @@
+financyexpert.com, www.financyexpert.com {
+	reverse_proxy app-blue:3000
+}

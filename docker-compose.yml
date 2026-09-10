@@ -1,0 +1,69 @@
+x-app: &app
+  image: financial-manager:app
+  build: .
+  restart: unless-stopped
+  environment:
+    DATABASE_URL: postgresql://finance:finance@db:5432/finance
+    AUTH_SECRET: ${AUTH_SECRET:-dev-secret-change-me-32chars-min!!}
+    SEED_USERNAME: ${SEED_USERNAME:-admin}
+    SEED_PASSWORD: ${SEED_PASSWORD:-admin123}
+    NODE_ENV: production
+    PORT: "3000"
+    HOSTNAME: 0.0.0.0
+    AUTH_COOKIE_SECURE: "true"
+  depends_on:
+    db:
+      condition: service_healthy
+  healthcheck:
+    test:
+      [
+        "CMD",
+        "node",
+        "-e",
+        "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+      ]
+    interval: 5s
+    timeout: 5s
+    retries: 12
+    start_period: 90s
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: finance
+      POSTGRES_DB: finance
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finance -d finance"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  app-blue:
+    <<: *app
+
+  app-green:
+    <<: *app
+    profiles: ["green"]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
